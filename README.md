@@ -148,11 +148,11 @@ Registrar las características del entorno donde se ejecutó el experimento:
 
 | Componente | Valor |
 |------------|-------|
-| **Procesador** | [Completar] |
-| **RAM** | [Completar] |
-| **Sistema operativo** | [Completar] |
-| **Arquitectura** | [Completar] |
-| **Docker** | [Completar versión] |
+| **Procesador** | Intel(R) Xeon(R) @ 2.80GHz |
+| **RAM** | 8 GB |
+| **Sistema operativo** | Linux 6.18.44-fc-v114 |
+| **Arquitectura** | x86_64 |
+| **Docker** | 29.8.2 |
 | **GCC (C++)** | 13.x (imagen `gcc:13`) |
 | **Go** | 1.22.x (imagen `golang:1.22`) |
 | **Java** | 21 (imagen `eclipse-temurin:21`) |
