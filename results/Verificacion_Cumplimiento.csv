@@ -1,0 +1,30 @@
+﻿N;Semana;Requisito;Estado;Evidencia
+1;Semana 1;Pregunta de investigacion formulada;Completado;README.md
+2;Semana 1;Hipotesis nula y alternativa definidas;Completado;README.md
+3;Semana 1;Variables identificadas;Completado;README.md tabla de variables
+4;Semana 1;Diseno factorial completo;Completado;4x3x10 = 120 observaciones
+5;Semana 1;Repositorio GitHub creado;Completado;github.com/jffp-alt/matrix-benchmark
+6;Semana 2;Algoritmo naive O(n3) en 4 lenguajes;Completado;implementations/cpp go java python
+7;Semana 2;LCG con semilla fija (42);Completado;Generador replicado en 4 lenguajes
+8;Semana 2;Solo cronometra multiplicacion;Completado;Excluye generacion de matrices
+9;Semana 2;Dockerfile por lenguaje;Completado;gcc:13 golang:1.22 temurin:21 python:3.12
+10;Semana 2;Salida CSV estandarizada;Completado;language N repetition time_seconds
+11;Semana 3;Pipeline Snakemake funcional;Completado;Snakefile con reglas completas
+12;Semana 3;Script sin Docker (run_native.sh);Completado;Compila y ejecuta nativamente
+13;Semana 3;120 mediciones generadas;Completado;benchmark.csv con 120 registros
+14;Semana 3;Entorno de ejecucion documentado;Completado;CPU RAM OS Docker compiladores
+15;Semana 4;Script analyze.py completo;Completado;Descriptivas ANOVA Tukey HSD
+16;Semana 4;Estadisticas descriptivas;Completado;descriptive_stats.csv
+17;Semana 4;ANOVA de dos factores;Completado;F(lenguaje)=62317 p<0.001
+18;Semana 4;Tukey HSD post-hoc;Completado;Python mas lento C++ Go Java similares
+19;Semana 4;Boxplot por lenguaje;Completado;boxplot_by_language.png
+20;Semana 4;Grafico de interaccion;Completado;interaction_plot.png
+21;Semana 4;Interpretacion documentada;Completado;Informe docx y presentacion pptx
+22;Semana 5;README.md completo;Completado;Instrucciones de reproduccion
+23;Semana 5;Licencia MIT;Completado;Archivo LICENSE
+24;Semana 5;FAIR_datasheet.md;Completado;Principios FAIR
+25;Semana 5;Criterios ACM documentados;Completado;Functional Reusable Available
+26;Semana 5;Bibliografia;Completado;ACM NAS arXiv
+27;Semana 5;Segunda semilla (43);Completado;Replicabilidad verificada
+28;Semana 5;Publicacion Zenodo con DOI;Pendiente;Conectar repo a Zenodo y crear release
+29;Semana 5;Informe y presentacion;Completado;DOCX PPTX y PDF generados
