@@ -1,5 +1,5 @@
 __pycache__/
 *.pyc
-results/*.csv
-results/*.txt
-results/*.png
+implementations/cpp/matrix_mult
+implementations/go/matrix_mult
+implementations/java/*.class
