@@ -128,6 +128,19 @@ Este comando ejecuta automáticamente:
 4. Ejecuta el análisis estadístico (ANOVA + Tukey HSD).
 5. Genera tablas y gráficos en `results/`.
 
+### Ejecución nativa sin Docker (alternativa)
+
+Si Docker no está disponible, se puede ejecutar todo el experimento nativamente (requiere g++, go, javac y python3 instalados):
+
+```bash
+chmod +x run_native.sh
+./run_native.sh
+```
+
+Este script compila, ejecuta los 4 benchmarks, integra los CSVs y corre el análisis estadístico completo.
+
+> **Nota**: La ejecución completa (especialmente Python N=1500) puede tomar más de 1 hora.
+
 ### Ejecución paso a paso (alternativa)
 
 Si se prefiere ejecutar cada etapa por separado:
