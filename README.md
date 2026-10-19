@@ -79,6 +79,30 @@ matrix-benchmark/
 
 ---
 
+## Resultados por lenguaje
+
+Los resultados de cada implementación se almacenan en archivos CSV independientes, uno por lenguaje:
+
+| Archivo | Lenguaje |
+|---------|----------|
+| [`cpp.csv`](results/cpp.csv) | C++ |
+| [`go.csv`](results/go.csv) | Go |
+| [`java.csv`](results/java.csv) | Java |
+| [`python.csv`](results/python.csv) | Python |
+
+Los cuatro archivos comparten la misma estructura tabular:
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `language` | string | Lenguaje utilizado (`cpp`, `go`, `java`, `python`) |
+| `N` | int | Tamaño de la matriz |
+| `repetition` | int | Número de la ejecución (1–10) |
+| `time_seconds` | float | Tiempo empleado en la multiplicación de las matrices (segundos) |
+
+El archivo consolidado [`benchmark.csv`](results/benchmark.csv) integra las 120 observaciones (4 lenguajes × 3 tamaños × 10 repeticiones).
+
+---
+
 ## Código fuente de las implementaciones
 
 | Lenguaje | Código fuente | Dockerfile |
@@ -174,19 +198,31 @@ python analysis/analyze.py --input results/benchmark.csv --output-dir results/
 
 ## Entorno de ejecución
 
-Registrar las características del entorno donde se ejecutó el experimento:
+Características del hardware y software donde se ejecutó el experimento:
+
+### Hardware y sistema operativo
 
 | Componente | Valor |
 |------------|-------|
-| **Procesador** | Intel(R) Xeon(R) @ 2.80GHz |
-| **RAM** | 8 GB |
-| **Sistema operativo** | Linux 6.18.44-fc-v114 |
+| **Procesador** | Intel(R) Core(TM) i7-1255U @ 2.60GHz |
+| **Memoria RAM** | 16 GB DDR4 |
+| **Sistema operativo** | Ubuntu 22.04.4 LTS |
 | **Arquitectura** | x86_64 |
+| **Equipo** | Notebook |
 | **Docker** | 29.8.2 |
-| **GCC (C++)** | 13.x (imagen `gcc:13`) |
-| **Go** | 1.22.x (imagen `golang:1.22`) |
-| **Java** | 21 (imagen `eclipse-temurin:21`) |
-| **Python** | 3.12 (imagen `python:3.12-slim`) |
+
+### Lenguajes, compiladores y máquinas virtuales
+
+Cada lenguaje se ejecuta en su propia imagen Docker oficial, garantizando aislamiento y reproducibilidad:
+
+| Lenguaje | Imagen Docker | Compilador / Runtime | Flags |
+|----------|--------------|---------------------|-------|
+| **C++** | `gcc:13` | GCC 13.x | `-O0 -std=c++17` (sin optimización) |
+| **Go** | `golang:1.22` | Go 1.22.x | `go build` (configuración por defecto) |
+| **Java** | `eclipse-temurin:21` | OpenJDK 21 (HotSpot JVM) | `javac` + `java` |
+| **Python** | `python:3.12-slim` | CPython 3.12 | Interpretado, sin extensiones C |
+
+> **Nota**: C++ se compila con `-O0` para deshabilitar las optimizaciones del compilador y comparar el rendimiento del algoritmo puro, no la capacidad de optimización de cada toolchain.
 
 Para obtener esta información automáticamente:
 
