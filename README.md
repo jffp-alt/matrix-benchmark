@@ -250,13 +250,47 @@ Cada archivo CSV sigue la estructura:
 
 ## Análisis estadístico
 
+### Comparación de tiempos promedio
+
+![Tiempo promedio de ejecución por lenguaje y tamaño de matriz](results/bar_chart_comparison.png)
+
+### Distribución de tiempos (Boxplot)
+
+![Distribución de tiempos de ejecución por tamaño de matriz](results/boxplot_comparison.png)
+
+### Gráfico de interacción: Lenguaje × Tamaño
+
+![Gráfico de interacción Lenguaje × Tamaño](results/interaction_chart.png)
+
+### Mapa de calor de tiempos promedio
+
+![Mapa de calor de tiempos promedio](results/heatmap_times.png)
+
+### Speedup relativo a Python
+
+![Speedup relativo a Python](results/speedup_chart.png)
+
+### ANOVA de dos factores
+
+Todos los factores y su interacción son estadísticamente significativos (p < 0.001):
+
+| Factor | F | p-valor | Significancia |
+|--------|---|---------|---------------|
+| Lenguaje | 62,317.49 | 1.09 × 10⁻¹⁷⁴ | *** |
+| Tamaño (N) | 68,794.05 | 2.01 × 10⁻¹⁶⁸ | *** |
+| Lenguaje × Tamaño | 25,489.80 | 1.03 × 10⁻¹⁶⁷ | *** |
+
+### Comparaciones post-hoc (Tukey HSD)
+
+Al colapsar por tamaño, las diferencias entre C++, Go y Java **no** son significativas entre sí (p > 0.05), pero los tres son significativamente más rápidos que Python (p < 0.001).
+
+### Archivos generados
+
 El script `analysis/analyze.py` genera:
 
-- **`descriptive_stats.csv`**: Media, desviación estándar, mediana, mín/máx por grupo.
-- **`anova_results.txt`**: ANOVA de dos factores (lenguaje × tamaño) con interacción.
-- **`tukey_results.txt`**: Comparaciones múltiples post-hoc Tukey HSD.
-- **`boxplot_by_language.png`**: Distribución de tiempos por lenguaje y tamaño.
-- **`interaction_plot.png`**: Gráfico de interacción lenguaje × tamaño.
+- [`descriptive_stats.csv`](results/descriptive_stats.csv) — Media, desviación estándar, mediana, mín/máx por grupo.
+- [`anova_results.txt`](results/anova_results.txt) — ANOVA de dos factores (lenguaje × tamaño) con interacción.
+- [`tukey_results.txt`](results/tukey_results.txt) — Comparaciones múltiples post-hoc Tukey HSD.
 
 ---
 
