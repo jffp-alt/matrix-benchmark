@@ -79,6 +79,23 @@ matrix-benchmark/
 
 ---
 
+## Código fuente de las implementaciones
+
+| Lenguaje | Código fuente | Dockerfile |
+|----------|--------------|------------|
+| **C++** | [`matrix_mult.cpp`](implementations/cpp/matrix_mult.cpp) | [`Dockerfile`](implementations/cpp/Dockerfile) |
+| **Go** | [`matrix_mult.go`](implementations/go/matrix_mult.go) | [`Dockerfile`](implementations/go/Dockerfile) |
+| **Java** | [`MatrixMult.java`](implementations/java/MatrixMult.java) | [`Dockerfile`](implementations/java/Dockerfile) |
+| **Python** | [`matrix_mult.py`](implementations/python/matrix_mult.py) | [`Dockerfile`](implementations/python/Dockerfile) |
+
+## Presentaciones
+
+| Semana | Archivo | Contenido |
+|--------|---------|-----------|
+| **Semana 2** | [`Semana2_Benchmark_Matrices.pptx`](results/Semana2_Benchmark_Matrices.pptx) | Implementación, decisiones de diseño, entorno y primeros resultados |
+
+---
+
 ## Requisitos previos
 
 - [Docker](https://docs.docker.com/get-docker/) ≥ 24.0
