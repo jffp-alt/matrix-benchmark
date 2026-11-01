@@ -1,19 +1,31 @@
 """
-Snakefile - Pipeline reproducible para benchmark de multiplicación de matrices.
-Coordina la ejecución de contenedores Docker, integración de resultados y análisis estadístico.
+Snakefile - Pipeline reproducible para benchmark de multiplicacion de matrices.
+Coordina la ejecucion de contenedores Docker, integracion de resultados y analisis estadistico.
+
+Compatible con Windows (PowerShell) y Linux/macOS.
 
 Prerequisitos:
-  Las imágenes Docker deben construirse manualmente antes de ejecutar el pipeline:
+  Las imagenes Docker deben construirse manualmente antes de ejecutar el pipeline:
     docker build -t matrix-cpp implementations/cpp/
     docker build -t matrix-go implementations/go/
     docker build -t matrix-java implementations/java/
     docker build -t matrix-python implementations/python/
 """
 
+import os
+import platform
+
 LANGUAGES = ["cpp", "go", "java", "python"]
 SIZES = [500, 1000, 1500]
 SEED = 42
 REPS = 10
+
+# Detectar ruta absoluta del directorio de trabajo (compatible Windows/Linux)
+WORKDIR = os.getcwd().replace("\\", "/")
+
+wildcard_constraints:
+    lang="[a-z]+",
+    n="[0-9]+"
 
 
 rule all:
@@ -32,33 +44,35 @@ rule all:
 
 
 rule run_benchmark:
-    """Ejecuta el contenedor Docker para un lenguaje y tamaño de matriz específico."""
+    """Ejecuta el contenedor Docker para un lenguaje y tamano de matriz especifico."""
     output:
         temp("results/{lang}_N{n}.csv")
     params:
         seed=SEED,
-        reps=REPS
+        reps=REPS,
+        workdir=WORKDIR
     shell:
-        """
-        docker run --rm \
-            -v $(pwd)/results:/output \
-            matrix-{wildcards.lang} \
-            --n {wildcards.n} --reps {params.reps} --seed {params.seed} \
-            --output /output/{wildcards.lang}_N{wildcards.n}.csv
-        """
+        'docker run --rm -v "{params.workdir}/results:/output" '
+        'matrix-{wildcards.lang} '
+        '--n {wildcards.n} --reps {params.reps} --seed {params.seed} '
+        '--output /output/{wildcards.lang}_N{wildcards.n}.csv'
 
 
 rule merge_language:
-    """Integra los resultados parciales de un lenguaje en un único archivo."""
+    """Integra los resultados parciales de un lenguaje en un unico archivo."""
     input:
         expand("results/{{lang}}_N{n}.csv", n=SIZES)
     output:
         "results/{lang}.csv"
-    shell:
-        """
-        echo "language,N,repetition,time_seconds" > {output}
-        cat {input} >> {output}
-        """
+    run:
+        with open(output[0], "w") as out:
+            out.write("language,N,repetition,time_seconds\n")
+            for f in input:
+                with open(f, "r") as inp:
+                    for line in inp:
+                        line = line.strip()
+                        if line and not line.startswith("language"):
+                            out.write(line + "\n")
 
 
 rule merge_all:
@@ -67,17 +81,19 @@ rule merge_all:
         expand("results/{lang}.csv", lang=LANGUAGES)
     output:
         "results/benchmark.csv"
-    shell:
-        """
-        echo "language,N,repetition,time_seconds" > {output}
-        for f in {input}; do
-            tail -n +2 "$f" >> {output}
-        done
-        """
+    run:
+        with open(output[0], "w") as out:
+            out.write("language,N,repetition,time_seconds\n")
+            for f in input:
+                with open(f, "r") as inp:
+                    for line in inp:
+                        line = line.strip()
+                        if line and not line.startswith("language"):
+                            out.write(line + "\n")
 
 
 rule analysis:
-    """Ejecuta el análisis estadístico completo: ANOVA, Tukey HSD, tablas y gráficos."""
+    """Ejecuta el analisis estadistico completo: ANOVA, Tukey HSD, tablas y graficos."""
     input:
         "results/benchmark.csv"
     output:
@@ -92,6 +108,4 @@ rule analysis:
         "results/speedup_chart.png",
         "results/interaction_chart.png"
     shell:
-        """
-        python analysis/analyze.py --input {input} --output-dir results/
-        """
+        'python analysis/analyze.py --input {input} --output-dir results/'
