@@ -7,7 +7,7 @@
 | **Nombre** | Benchmark reproducible de multiplicación de matrices NxN |
 | **Versión** | 1.0 |
 | **Fecha de creación** | 2026-10 |
-| **Autores** | [Nombre del estudiante] |
+| **Autores** | Jorge Fornes |
 | **Licencia** | MIT |
 | **DOI** | [Pendiente - asignado por Zenodo] |
 

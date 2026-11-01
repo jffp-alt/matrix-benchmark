@@ -20,10 +20,15 @@ rule all:
     input:
         "results/benchmark.csv",
         "results/anova_results.txt",
+        "results/tukey_results.txt",
+        "results/descriptive_stats.csv",
         "results/boxplot_by_language.png",
         "results/interaction_plot.png",
-        "results/tukey_results.txt",
-        "results/descriptive_stats.csv"
+        "results/bar_chart_comparison.png",
+        "results/boxplot_comparison.png",
+        "results/heatmap_times.png",
+        "results/speedup_chart.png",
+        "results/interaction_chart.png"
 
 
 rule run_benchmark:
@@ -80,7 +85,12 @@ rule analysis:
         "results/tukey_results.txt",
         "results/descriptive_stats.csv",
         "results/boxplot_by_language.png",
-        "results/interaction_plot.png"
+        "results/interaction_plot.png",
+        "results/bar_chart_comparison.png",
+        "results/boxplot_comparison.png",
+        "results/heatmap_times.png",
+        "results/speedup_chart.png",
+        "results/interaction_chart.png"
     shell:
         """
         python analysis/analyze.py --input {input} --output-dir results/

@@ -74,7 +74,12 @@ matrix-benchmark/
     ├── anova_results.txt
     ├── tukey_results.txt
     ├── boxplot_by_language.png
-    └── interaction_plot.png
+    ├── interaction_plot.png
+    ├── bar_chart_comparison.png
+    ├── boxplot_comparison.png
+    ├── heatmap_times.png
+    ├── speedup_chart.png
+    └── interaction_chart.png
 ```
 
 ---
@@ -292,6 +297,13 @@ El script `analysis/analyze.py` genera:
 - [`descriptive_stats.csv`](results/descriptive_stats.csv) — Media, desviación estándar, mediana, mín/máx por grupo.
 - [`anova_results.txt`](results/anova_results.txt) — ANOVA de dos factores (lenguaje × tamaño) con interacción.
 - [`tukey_results.txt`](results/tukey_results.txt) — Comparaciones múltiples post-hoc Tukey HSD.
+- [`boxplot_by_language.png`](results/boxplot_by_language.png) — Boxplot agrupado por lenguaje y tamaño.
+- [`interaction_plot.png`](results/interaction_plot.png) — Gráfico de interacción Lenguaje × Tamaño.
+- [`bar_chart_comparison.png`](results/bar_chart_comparison.png) — Comparación de barras de tiempos promedio.
+- [`boxplot_comparison.png`](results/boxplot_comparison.png) — Boxplots comparativos por tamaño de matriz.
+- [`heatmap_times.png`](results/heatmap_times.png) — Mapa de calor de tiempos promedio.
+- [`speedup_chart.png`](results/speedup_chart.png) — Speedup relativo a Python.
+- [`interaction_chart.png`](results/interaction_chart.png) — Gráfico de interacción con barras de error.
 
 ---
 
