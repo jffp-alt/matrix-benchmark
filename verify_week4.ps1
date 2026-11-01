@@ -1,13 +1,13 @@
 # =============================================================================
-# verify_week4.ps1 — Verificación de cumplimiento Semana 4
+# verify_week4.ps1 - Verificacion de cumplimiento Semana 4
 # =============================================================================
 # Verifica que el repositorio cumple TODOS los requisitos de la Semana 4:
 #   - Estructura de archivos completa
-#   - Imágenes Docker construidas
+#   - Imagenes Docker construidas
 #   - Pipeline Snakemake con DAG correcto
 #   - Resultados generados (120 observaciones)
-#   - Análisis estadístico (ANOVA, Tukey, tablas, gráficos)
-#   - Documentación y FAIR datasheet
+#   - Analisis estadistico (ANOVA, Tukey, tablas, graficos)
+#   - Documentacion y FAIR datasheet
 #   - Criterios ACM Reusable
 #
 # Uso:
@@ -38,7 +38,7 @@ function Test-WARN($msg) {
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "  VERIFICACION SEMANA 4 — Automatizacion y analisis         " -ForegroundColor Cyan
+Write-Host "  VERIFICACION SEMANA 4 - Automatizacion y analisis         " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -68,7 +68,7 @@ foreach ($item in $requiredFiles) {
     if (Test-Path $item[0]) {
         Test-OK "$($item[1]) ($($item[0]))"
     } else {
-        Test-FAIL "$($item[1]) — FALTA $($item[0])"
+        Test-FAIL "$($item[1]) - FALTA $($item[0])"
     }
 }
 
@@ -95,7 +95,7 @@ if ($dockerOk) {
             $size = docker images --format "{{.Size}}" $img 2>&1
             Test-OK "Imagen $img ($size)"
         } else {
-            Test-FAIL "Imagen $img no encontrada — ejecutar: docker build -t $img implementations/$($img -replace 'matrix-','')/"
+            Test-FAIL "Imagen $img no encontrada - ejecutar: docker build -t $img implementations/$($img -replace 'matrix-','')/"
         }
     }
 }
@@ -183,12 +183,12 @@ foreach ($f in $langFiles) {
     if (Test-Path $path) {
         $rows = (Get-Content $path | Measure-Object -Line).Lines - 1
         if ($rows -eq 30) {
-            Test-OK "$f ($rows registros — 3 tamanos x 10 reps)"
+            Test-OK "$f ($rows registros - 3 tamanos x 10 reps)"
         } else {
             Test-WARN "$f tiene $rows registros (se esperaban 30)"
         }
     } else {
-        Test-FAIL "$f — no encontrado"
+        Test-FAIL "$f - no encontrado"
     }
 }
 
@@ -244,7 +244,7 @@ if (Test-Path "results/descriptive_stats.csv") {
 if (Test-Path "results/anova_results.txt") {
     $anova = Get-Content "results/anova_results.txt" -Raw
     if ($anova -match "C\(language\)" -and $anova -match "C\(N_cat\)" -and $anova -match "C\(language\):C\(N_cat\)") {
-        Test-OK "anova_results.txt — ANOVA dos factores con interaccion (lenguaje x tamano)"
+        Test-OK "anova_results.txt - ANOVA dos factores con interaccion (lenguaje x tamano)"
     } else {
         Test-WARN "anova_results.txt existe pero no contiene los 3 factores esperados"
     }
@@ -256,7 +256,7 @@ if (Test-Path "results/anova_results.txt") {
 if (Test-Path "results/tukey_results.txt") {
     $tukey = Get-Content "results/tukey_results.txt" -Raw
     if ($tukey -match "Tukey HSD" -and $tukey -match "Por lenguaje") {
-        Test-OK "tukey_results.txt — Comparaciones post-hoc Tukey HSD"
+        Test-OK "tukey_results.txt - Comparaciones post-hoc Tukey HSD"
     } else {
         Test-WARN "tukey_results.txt existe pero formato inesperado"
     }
@@ -285,9 +285,9 @@ foreach ($chart in $charts) {
     $path = "results/$($chart[0])"
     if (Test-Path $path) {
         $sizeKB = [math]::Round((Get-Item $path).Length / 1KB, 0)
-        Test-OK "$($chart[1]) — $($chart[0]) (${sizeKB} KB)"
+        Test-OK "$($chart[1]) - $($chart[0]) (${sizeKB} KB)"
     } else {
-        Test-FAIL "$($chart[1]) — $($chart[0]) FALTANTE"
+        Test-FAIL "$($chart[1]) - $($chart[0]) FALTANTE"
     }
 }
 
@@ -326,12 +326,12 @@ if (Test-Path "FAIR_datasheet.md") {
     if ($fair -match "\[Nombre del estudiante\]") {
         Test-FAIL "FAIR_datasheet.md aun tiene placeholder [Nombre del estudiante]"
     } else {
-        Test-OK "FAIR_datasheet.md — autor completado"
+        Test-OK "FAIR_datasheet.md - autor completado"
     }
     if ($fair -match "Findable" -and $fair -match "Accessible" -and $fair -match "Interoperable" -and $fair -match "Reusable") {
-        Test-OK "FAIR_datasheet.md — principios FAIR documentados"
+        Test-OK "FAIR_datasheet.md - principios FAIR documentados"
     } else {
-        Test-WARN "FAIR_datasheet.md — faltan principios FAIR"
+        Test-WARN "FAIR_datasheet.md - faltan principios FAIR"
     }
 } else {
     Test-FAIL "FAIR_datasheet.md no encontrado"

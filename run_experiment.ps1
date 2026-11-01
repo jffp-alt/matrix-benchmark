@@ -1,10 +1,10 @@
 # =============================================================================
-# run_experiment.ps1 — Semana 4: Automatización y análisis estadístico
+# run_experiment.ps1 - Semana 4: Automatizacion y analisis estadistico
 # =============================================================================
-# Script de demostración que ejecuta el flujo completo del experimento:
-#   1. Construye manualmente las 4 imágenes Docker desde los Dockerfiles
-#   2. Instala dependencias de análisis (Python)
-#   3. Ejecuta el pipeline Snakemake (benchmark + análisis estadístico)
+# Script de demostracion que ejecuta el flujo completo del experimento:
+#   1. Construye manualmente las 4 imagenes Docker desde los Dockerfiles
+#   2. Instala dependencias de analisis (Python)
+#   3. Ejecuta el pipeline Snakemake (benchmark + analisis estadistico)
 #   4. Verifica que todos los artefactos fueron generados
 #
 # Uso:
@@ -16,7 +16,7 @@
 #   - Snakemake (pip install snakemake)
 #   - Python >= 3.10
 #
-# Nota: La ejecución completa puede tomar más de 1 hora.
+# Nota: La ejecucion completa puede tomar mas de 1 hora.
 # =============================================================================
 
 $ErrorActionPreference = "Stop"
@@ -80,7 +80,7 @@ if ($missing) {
 Write-Host ""
 
 # ---------------------------------------------------------
-# Paso 1: Construir imágenes Docker manualmente
+# Paso 1: Construir imagenes Docker manualmente
 # ---------------------------------------------------------
 Write-Host "[Paso 1] Construyendo imagenes Docker desde Dockerfiles..." -ForegroundColor Yellow
 Write-Host "  (Las imagenes se construyen localmente, NO se descargan de registros)" -ForegroundColor Cyan
@@ -104,7 +104,7 @@ docker images --format "    {{.Repository}}:{{.Tag}} ({{.Size}})" | Select-Strin
 Write-Host ""
 
 # ---------------------------------------------------------
-# Paso 2: Instalar dependencias de análisis
+# Paso 2: Instalar dependencias de analisis
 # ---------------------------------------------------------
 Write-Host "[Paso 2] Instalando dependencias de analisis..." -ForegroundColor Yellow
 pip install -q -r analysis/requirements.txt
@@ -194,12 +194,12 @@ foreach ($f in $dataFiles) {
         $rows = (Get-Content $f | Measure-Object -Line).Lines - 1
         Write-Host "    [OK] $(Split-Path $f -Leaf) ($rows registros)" -ForegroundColor Green
     } else {
-        Write-Host "    [X] $(Split-Path $f -Leaf) — FALTANTE" -ForegroundColor Red
+        Write-Host "    [X] $(Split-Path $f -Leaf) - FALTANTE" -ForegroundColor Red
         $allOk = $false
     }
 }
 
-# Análisis estadístico
+# Analisis estadistico
 Write-Host ""
 Write-Host "  Analisis estadistico:" -ForegroundColor White
 $analysisFiles = @("results/descriptive_stats.csv", "results/anova_results.txt", "results/tukey_results.txt")
@@ -207,12 +207,12 @@ foreach ($f in $analysisFiles) {
     if (Test-Path $f) {
         Write-Host "    [OK] $(Split-Path $f -Leaf)" -ForegroundColor Green
     } else {
-        Write-Host "    [X] $(Split-Path $f -Leaf) — FALTANTE" -ForegroundColor Red
+        Write-Host "    [X] $(Split-Path $f -Leaf) - FALTANTE" -ForegroundColor Red
         $allOk = $false
     }
 }
 
-# Gráficos
+# Graficos
 Write-Host ""
 Write-Host "  Graficos:" -ForegroundColor White
 $charts = @(
@@ -230,7 +230,7 @@ foreach ($f in $charts) {
         $size = [math]::Round((Get-Item $path).Length / 1KB, 0)
         Write-Host "    [OK] $f (${size} KB)" -ForegroundColor Green
     } else {
-        Write-Host "    [X] $f — FALTANTE" -ForegroundColor Red
+        Write-Host "    [X] $f - FALTANTE" -ForegroundColor Red
         $allOk = $false
     }
 }
@@ -253,7 +253,7 @@ if ($allOk) {
     Write-Host "  EXPERIMENTO COMPLETADO EXITOSAMENTE" -ForegroundColor Green
     Write-Host "  Todos los artefactos fueron generados correctamente." -ForegroundColor Green
 } else {
-    Write-Host "  EXPERIMENTO INCOMPLETO — revisar artefactos faltantes." -ForegroundColor Red
+    Write-Host "  EXPERIMENTO INCOMPLETO - revisar artefactos faltantes." -ForegroundColor Red
 }
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
