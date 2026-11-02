@@ -83,8 +83,7 @@ matrix-benchmark/
     ├── boxplot_comparison.png
     ├── heatmap_times.png
     ├── speedup_chart.png
-    ├── interaction_chart.png
-    └── Semana5_Artifact_Evaluacion.pptx
+    └── interaction_chart.png
 ```
 
 ---
@@ -128,7 +127,6 @@ El archivo consolidado [`benchmark.csv`](results/benchmark.csv) integra las 120 
 |--------|---------|-----------|
 | **Semana 2** | [`Semana2_Benchmark_Matrices.pptx`](results/Semana2_Benchmark_Matrices.pptx) | Implementación, decisiones de diseño, entorno y primeros resultados |
 | **Semana 3** | [`Semana3_Benchmark.pptx`](results/Semana3_Benchmark.pptx) | Resultados de benchmark Semana 3 |
-| **Semana 5** | [`Semana5_Artifact_Evaluacion.pptx`](results/Semana5_Artifact_Evaluacion.pptx) | Evaluacion del artifact: badges ACM, graficos y publicacion |
 
 ---
 
