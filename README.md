@@ -48,8 +48,10 @@ matrix-benchmark/
 ├── LICENSE                            # Licencia MIT
 ├── FAIR_datasheet.md                  # Mini datasheet FAIR
 ├── Snakefile                          # Pipeline de automatizacion
-├── run_experiment.sh                  # Script de ejecucion completa (Linux/macOS)
-├── run_experiment.ps1                 # Script de ejecucion completa (Windows)
+├── build_docker.sh                    # Construccion manual de imagenes Docker (Linux/macOS)
+├── build_docker.ps1                   # Construccion manual de imagenes Docker (Windows)
+├── run_experiment.sh                  # Ejecucion del pipeline completo (Linux/macOS)
+├── run_experiment.ps1                 # Ejecucion del pipeline completo (Windows)
 ├── run_native.sh                      # Ejecucion nativa sin Docker (Linux/macOS)
 ├── verify_week4.ps1                   # Verificacion de requisitos Semana 4 (Windows)
 ├── implementations/
@@ -156,18 +158,28 @@ git clone https://github.com/jffp-alt/matrix-benchmark.git
 cd matrix-benchmark
 ```
 
-### Paso 2: Construir las imágenes Docker (manual)
+### Paso 2: Construir las imagenes Docker manualmente
 
-Las imágenes deben construirse manualmente antes de ejecutar el pipeline:
+Las imagenes **deben construirse manualmente** antes de ejecutar el pipeline. No se utilizan imagenes pre-construidas de registros externos (Docker Hub, GHCR, etc.):
 
 ```bash
+# Opcion A: Script automatizado
+chmod +x build_docker.sh
+./build_docker.sh
+
+# Opcion B: Comandos individuales
 docker build -t matrix-cpp implementations/cpp/
 docker build -t matrix-go implementations/go/
 docker build -t matrix-java implementations/java/
 docker build -t matrix-python implementations/python/
 ```
 
-### Paso 3: Instalar dependencias de análisis
+En Windows (PowerShell):
+```powershell
+powershell -ExecutionPolicy Bypass -File build_docker.ps1
+```
+
+### Paso 3: Instalar dependencias de analisis
 
 ```bash
 pip install -r analysis/requirements.txt
@@ -176,16 +188,18 @@ pip install -r analysis/requirements.txt
 ### Paso 4: Ejecutar el pipeline completo
 
 ```bash
-snakemake --cores 1
+snakemake --cores 1 --forceall
 ```
 
-Este comando ejecuta automáticamente:
+> **Nota**: El flag `--forceall` garantiza que todas las etapas se ejecuten desde cero, ignorando resultados previos. Esto asegura la reproducibilidad completa del experimento.
+
+Este comando ejecuta automaticamente:
 
 1. Los 4 contenedores Docker para N = 500, 1000 y 1500 (10 repeticiones cada uno).
 2. Genera los archivos `cpp.csv`, `go.csv`, `java.csv` y `python.csv`.
 3. Integra los resultados en `benchmark.csv`.
-4. Ejecuta el análisis estadístico (ANOVA + Tukey HSD).
-5. Genera tablas y gráficos en `results/`.
+4. Ejecuta el analisis estadistico (ANOVA + Tukey HSD).
+5. Genera tablas y graficos en `results/`.
 
 ### Ejecución nativa sin Docker (alternativa)
 
@@ -202,17 +216,20 @@ Este script compila, ejecuta los 4 benchmarks, integra los CSVs y corre el anál
 
 ### Ejecucion en Windows (PowerShell)
 
-Para ejecutar el experimento completo en Windows de forma nativa:
+Para ejecutar el experimento completo en Windows:
 
 ```powershell
-# Ejecutar el experimento completo (compilacion, benchmarks, analisis)
-.\run_experiment.ps1
+# Paso 1: Construir imagenes Docker manualmente (una sola vez)
+powershell -ExecutionPolicy Bypass -File build_docker.ps1
 
-# Verificar que se cumplen los requisitos de Semana 4
-.\verify_week4.ps1
+# Paso 2: Ejecutar el pipeline completo (limpia resultados previos y re-ejecuta todo)
+powershell -ExecutionPolicy Bypass -File run_experiment.ps1
+
+# Paso 3: Verificar que se cumplen los requisitos de Semana 4
+powershell -ExecutionPolicy Bypass -File verify_week4.ps1
 ```
 
-El script `run_experiment.ps1` compila cada lenguaje, ejecuta los benchmarks para todos los tamanos y repeticiones, consolida los CSVs y genera el analisis estadistico.
+El script `run_experiment.ps1` verifica que las imagenes Docker existan, limpia resultados previos, ejecuta el pipeline Snakemake con `--forceall` y verifica los artefactos generados.
 
 ### Ejecucion paso a paso (alternativa)
 

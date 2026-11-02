@@ -2,10 +2,11 @@
 # run_experiment.ps1 - Semana 4: Automatizacion y analisis estadistico
 # =============================================================================
 # Script de demostracion que ejecuta el flujo completo del experimento:
-#   1. Construye manualmente las 4 imagenes Docker desde los Dockerfiles
+#   1. Verifica que las imagenes Docker fueron construidas (con build_docker.ps1)
 #   2. Instala dependencias de analisis (Python)
-#   3. Ejecuta el pipeline Snakemake (benchmark + analisis estadistico)
-#   4. Verifica que todos los artefactos fueron generados
+#   3. Limpia resultados previos para garantizar ejecucion completa
+#   4. Ejecuta el pipeline Snakemake con --forceall (benchmark + analisis)
+#   5. Verifica que todos los artefactos fueron generados
 #
 # Uso:
 #   cd D:\ruta\matrix-benchmark
@@ -80,27 +81,30 @@ if ($missing) {
 Write-Host ""
 
 # ---------------------------------------------------------
-# Paso 1: Construir imagenes Docker manualmente
+# Paso 1: Verificar que las imagenes Docker fueron construidas manualmente
 # ---------------------------------------------------------
-Write-Host "[Paso 1] Construyendo imagenes Docker desde Dockerfiles..." -ForegroundColor Yellow
-Write-Host "  (Las imagenes se construyen localmente, NO se descargan de registros)" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "[Paso 1] Verificando imagenes Docker (deben construirse previamente con build_docker.ps1)..." -ForegroundColor Yellow
 
 $languages = @("cpp", "go", "java", "python")
+$missingImages = @()
 
 foreach ($lang in $languages) {
-    Write-Host "  Construyendo matrix-$lang desde implementations/$lang/Dockerfile..." -ForegroundColor White
-    docker build -t "matrix-$lang" "implementations/$lang/"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "  [X] Error construyendo matrix-$lang" -ForegroundColor Red
-        exit 1
+    $imgExists = docker images --format "{{.Repository}}" | Select-String "^matrix-$lang$"
+    if ($imgExists) {
+        Write-Host "  [OK] matrix-$lang encontrada" -ForegroundColor Green
+    } else {
+        Write-Host "  [X] matrix-$lang NO encontrada" -ForegroundColor Red
+        $missingImages += $lang
     }
-    Write-Host "  [OK] matrix-$lang construida" -ForegroundColor Green
 }
 
-Write-Host ""
-Write-Host "  Imagenes disponibles:" -ForegroundColor White
-docker images --format "    {{.Repository}}:{{.Tag}} ({{.Size}})" | Select-String "matrix-"
+if ($missingImages.Count -gt 0) {
+    Write-Host ""
+    Write-Host "  Faltan imagenes Docker. Construyalas primero:" -ForegroundColor Red
+    Write-Host "    powershell -ExecutionPolicy Bypass -File build_docker.ps1" -ForegroundColor White
+    exit 1
+}
+
 Write-Host ""
 
 # ---------------------------------------------------------
@@ -163,7 +167,7 @@ Write-Host ""
 
 $startTime = Get-Date
 
-snakemake --cores 1 --printshellcmds
+snakemake --cores 1 --forceall --printshellcmds
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  [X] Snakemake fallo. Revisa los errores arriba." -ForegroundColor Red

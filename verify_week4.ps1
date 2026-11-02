@@ -221,6 +221,67 @@ if (Test-Path "results/benchmark.csv") {
     Test-FAIL "benchmark.csv no encontrado"
 }
 
+# Verificar unicidad de mediciones (no hay filas duplicadas)
+if (Test-Path "results/benchmark.csv") {
+    $dataLines = Get-Content "results/benchmark.csv" | Select-Object -Skip 1
+    $uniqueLines = $dataLines | Sort-Object -Unique
+    if ($dataLines.Count -eq $uniqueLines.Count) {
+        Test-OK "benchmark.csv: todas las $($dataLines.Count) mediciones son unicas"
+    } else {
+        $dupes = $dataLines.Count - $uniqueLines.Count
+        Test-FAIL "benchmark.csv: $dupes filas duplicadas detectadas"
+    }
+
+    # Verificar que cada combinacion (language, N, rep) aparece exactamente una vez
+    $combos = $dataLines | ForEach-Object {
+        $parts = $_ -split ","
+        "$($parts[0]),$($parts[1]),$($parts[2])"
+    }
+    $uniqueCombos = $combos | Sort-Object -Unique
+    if ($uniqueCombos.Count -eq 120) {
+        Test-OK "benchmark.csv: 120 combinaciones unicas (language, N, rep) verificadas"
+    } else {
+        Test-FAIL "benchmark.csv: se esperaban 120 combinaciones unicas, se encontraron $($uniqueCombos.Count)"
+    }
+
+    # Verificar consistencia entre CSVs individuales y benchmark.csv
+    $benchData = $dataLines | Sort-Object
+    $mergedData = @()
+    foreach ($f in @("cpp", "go", "java", "python")) {
+        $path = "results/$f.csv"
+        if (Test-Path $path) {
+            $mergedData += Get-Content $path | Select-Object -Skip 1
+        }
+    }
+    $mergedData = $mergedData | Sort-Object
+
+    if ($benchData.Count -eq $mergedData.Count) {
+        $match = $true
+        for ($i = 0; $i -lt $benchData.Count; $i++) {
+            if ($benchData[$i] -ne $mergedData[$i]) {
+                $match = $false
+                break
+            }
+        }
+        if ($match) {
+            Test-OK "benchmark.csv es consistente con los 4 CSVs individuales"
+        } else {
+            Test-FAIL "benchmark.csv difiere de la union de los CSVs individuales"
+        }
+    } else {
+        Test-FAIL "benchmark.csv ($($benchData.Count) filas) no coincide con CSVs individuales ($($mergedData.Count) filas)"
+    }
+
+    # Verificar que los tiempos son positivos y razonables
+    $times = $dataLines | ForEach-Object { [double]($_ -split ",")[3] }
+    $invalidTimes = $times | Where-Object { $_ -le 0 -or $_ -gt 10000 }
+    if ($invalidTimes.Count -eq 0) {
+        Test-OK "Todos los tiempos son positivos y razonables (rango: $([math]::Round(($times | Measure-Object -Minimum).Minimum, 4))s - $([math]::Round(($times | Measure-Object -Maximum).Maximum, 2))s)"
+    } else {
+        Test-FAIL "$($invalidTimes.Count) mediciones con tiempos invalidos (<=0 o >10000s)"
+    }
+}
+
 Write-Host ""
 
 # =============================================================

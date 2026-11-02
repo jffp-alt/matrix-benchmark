@@ -3,10 +3,11 @@
 # run_experiment.sh — Semana 4: Automatización y análisis estadístico
 # =============================================================================
 # Script de demostración que ejecuta el flujo completo del experimento:
-#   1. Construye manualmente las 4 imágenes Docker desde los Dockerfiles
-#   2. Instala dependencias de análisis (Python)
-#   3. Ejecuta el pipeline Snakemake (benchmark + análisis estadístico)
-#   4. Verifica que todos los artefactos fueron generados
+#   1. Verifica que las imagenes Docker fueron construidas (con build_docker.sh)
+#   2. Instala dependencias de analisis (Python)
+#   3. Limpia resultados previos para garantizar ejecucion completa
+#   4. Ejecuta el pipeline Snakemake con --forceall (benchmark + analisis)
+#   5. Verifica que todos los artefactos fueron generados
 #
 # Uso:
 #   chmod +x run_experiment.sh
@@ -86,30 +87,35 @@ fi
 echo ""
 
 # ---------------------------------------------------------
-# Paso 1: Construir imágenes Docker manualmente
+# Paso 1: Verificar que las imagenes Docker fueron construidas
 # ---------------------------------------------------------
-echo -e "${YELLOW}[Paso 1] Construyendo imágenes Docker desde Dockerfiles...${NC}"
-echo -e "  ${CYAN}(Las imágenes se construyen localmente, NO se descargan de registros)${NC}"
-echo ""
+echo -e "${YELLOW}[Paso 1] Verificando imagenes Docker (deben construirse previamente con build_docker.sh)...${NC}"
 
 LANGUAGES=("cpp" "go" "java" "python")
+MISSING_IMAGES=0
 
 for LANG in "${LANGUAGES[@]}"; do
-    echo -e "  Construyendo ${GREEN}matrix-${LANG}${NC} desde implementations/${LANG}/Dockerfile..."
-    docker build -t "matrix-${LANG}" "implementations/${LANG}/" \
-        --quiet 2>&1 | tail -1
-    echo -e "  ${GREEN}✓ matrix-${LANG} construida${NC}"
+    if docker image inspect "matrix-${LANG}" &>/dev/null; then
+        echo -e "  ${GREEN}✓ matrix-${LANG} encontrada${NC}"
+    else
+        echo -e "  ${RED}✗ matrix-${LANG} NO encontrada${NC}"
+        MISSING_IMAGES=1
+    fi
 done
 
-echo ""
-echo -e "  Imágenes disponibles:"
-docker images --format "    {{.Repository}}:{{.Tag}} ({{.Size}})" | grep "^    matrix-"
+if [ "$MISSING_IMAGES" -eq 1 ]; then
+    echo ""
+    echo -e "${RED}Faltan imagenes Docker. Construyalas primero:${NC}"
+    echo "  chmod +x build_docker.sh && ./build_docker.sh"
+    exit 1
+fi
+
 echo ""
 
 # ---------------------------------------------------------
-# Paso 2: Instalar dependencias de análisis
+# Paso 2: Instalar dependencias de analisis
 # ---------------------------------------------------------
-echo -e "${YELLOW}[Paso 2] Instalando dependencias de análisis...${NC}"
+echo -e "${YELLOW}[Paso 2] Instalando dependencias de analisis...${NC}"
 pip install -q -r analysis/requirements.txt
 echo -e "  ${GREEN}✓ Dependencias instaladas${NC}"
 echo ""
@@ -163,7 +169,7 @@ echo ""
 
 START_TIME=$(date +%s)
 
-snakemake --cores 1 --printshellcmds 2>&1 | while IFS= read -r line; do
+snakemake --cores 1 --forceall --printshellcmds 2>&1 | while IFS= read -r line; do
     # Resaltar las reglas que se van ejecutando
     if echo "$line" | grep -q "^rule "; then
         echo -e "  ${GREEN}▶ ${line}${NC}"
