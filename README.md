@@ -32,11 +32,20 @@ El proyecto sigue los principios de reproducibilidad y replicabilidad científic
 ## Diseño experimental
 
 - **Algoritmo**: Multiplicación naive O(n³) con triple bucle anidado.
-- **Generación de datos**: Generador lineal congruencial (LCG) con semilla fija, idéntico en los 4 lenguajes para garantizar las mismas matrices de entrada.
+- **Generación de datos**: Generador lineal congruencial (LCG) con semilla fija (42 para matriz A, 43 para matriz B), idéntico en los 4 lenguajes para garantizar las mismas matrices de entrada.
 - **Medición**: Solo se cronometra la operación de multiplicación. La generación e inicialización de matrices se excluye del tiempo medido.
 - **Repeticiones**: 10 ejecuciones por cada combinación (lenguaje, N).
 - **Total de observaciones**: 4 × 3 × 10 = 120 mediciones.
 - **Análisis**: ANOVA de dos factores con interacción + comparaciones post-hoc Tukey HSD.
+
+### ¿Qué significa reproducible?
+
+Otra persona puede repetir el procedimiento a partir del código, los parámetros y las instrucciones. Esto implica:
+
+- **Mismos datos de entrada**: LCG determinista con semilla 42 (matriz A) y 43 (matriz B).
+- **Mismo diseño experimental**: Cuatro lenguajes, tamaños fijos (500, 1000, 1500) y 10 repeticiones por combinación.
+- **Entorno documentado**: Dockerfiles, versiones de runtime y dependencias de análisis.
+- **Medidas variables**: Los tiempos pueden cambiar con hardware, sistema y carga; reproducible **no** significa tiempos idénticos en cualquier computador.
 
 ---
 
@@ -164,7 +173,11 @@ cd matrix-benchmark
 
 ### Paso 2: Construir las imagenes Docker manualmente
 
-Las imagenes **deben construirse manualmente** antes de ejecutar el pipeline. No se utilizan imagenes pre-construidas de registros externos (Docker Hub, GHCR, etc.):
+Las imagenes **deben construirse manualmente** antes de ejecutar el pipeline. Esto es intencional: Snakemake orquesta la ejecución del experimento, pero **no construye las imágenes**. La separación asegura que:
+
+1. Se demuestra que las imágenes provienen de los Dockerfiles del repositorio, no de un registro externo.
+2. Se puede verificar la construcción antes de ejecutar el pipeline.
+3. Cada Dockerfile define la imagen base, el directorio de trabajo, la copia del código fuente, la compilación y el comando de ejecución.
 
 ```bash
 # Opcion A: Script automatizado
@@ -196,6 +209,20 @@ snakemake --cores 1 --forceall
 ```
 
 > **Nota**: El flag `--forceall` garantiza que todas las etapas se ejecuten desde cero, ignorando resultados previos. Esto asegura la reproducibilidad completa del experimento.
+
+#### ¿Qué hace Snakemake?
+
+Snakemake es un orquestador de tareas basado en dependencias. El archivo `Snakefile` define 5 reglas encadenadas, donde cada etapa solo comienza cuando existen los archivos que necesita:
+
+```
+1. run_benchmark   →  Ejecuta contenedores Docker (4 lenguajes × 3 tamaños × 10 reps)
+2. merge_language   →  Consolida CSV por lenguaje (cpp.csv, go.csv, java.csv, python.csv)
+3. merge_all        →  Integra todo en benchmark.csv (120 filas)
+4. analysis         →  ANOVA, Tukey HSD, tablas y gráficos
+5. all              →  Regla final que verifica los resultados
+```
+
+Si falta un archivo intermedio (por ejemplo `python.csv`), Snakemake ejecuta primero las tareas necesarias para producirlo. Con `--dry-run` se pueden ver las tareas previstas sin ejecutar el experimento.
 
 Este comando ejecuta automaticamente:
 
@@ -321,6 +348,23 @@ Cada archivo CSV sigue la estructura:
 
 ## Análisis estadístico
 
+### Metodología
+
+El experimento tiene dos factores y una variable de respuesta:
+
+| Elemento | Descripción |
+|----------|-------------|
+| **Factor A: Lenguaje** | C++, Go, Java, Python — ¿cambia el tiempo según el lenguaje? |
+| **Factor B: Tamaño (N)** | 500, 1000, 1500 — ¿cambia el tiempo según el tamaño? |
+| **Variable dependiente** | Tiempo de multiplicación (segundos) |
+| **Interacción A×B** | ¿La ventaja de un lenguaje depende del tamaño de la matriz? |
+
+**¿Por qué ANOVA de dos factores?** Una prueba t compara solo dos grupos. Multiplicar comparaciones sin ajuste aumenta los falsos positivos y no permite evaluar la interacción entre lenguaje y tamaño. ANOVA analiza los tres efectos (lenguaje, tamaño, interacción) dentro de un mismo modelo.
+
+**¿Para qué Tukey HSD?** ANOVA detecta si existen diferencias globales, pero no indica entre cuáles grupos ocurren. Tukey HSD compara pares de grupos controlando el error por comparaciones múltiples.
+
+> **Precaución**: Los resultados deben interpretarse considerando independencia, distribución de residuos y homogeneidad de varianzas. Significancia estadística no equivale a superioridad general de un lenguaje.
+
 ### Tiempos promedio de ejecucion (segundos)
 
 | Lenguaje | N=500 | N=1000 | N=1500 |
@@ -360,9 +404,39 @@ Todos los factores y su interacción son estadísticamente significativos (p < 0
 | Tamaño (N) | 33,751.04 | 9.64 × 10⁻¹⁵² | *** |
 | Lenguaje × Tamaño | 17,587.96 | 5.08 × 10⁻¹⁵⁹ | *** |
 
+**Interpretación**: El tiempo depende del lenguaje, del tamaño de la matriz y de cómo ambos factores se combinan. Como la interacción es significativa, conviene comparar lenguajes para cada tamaño por separado.
+
 ### Comparaciones post-hoc (Tukey HSD)
 
-Al colapsar por tamaño, las diferencias entre C++, Go y Java **no** son significativas entre sí (p > 0.05), pero los tres son significativamente más rápidos que Python (p < 0.001).
+**Comparación global** (agrupando los tres tamaños): Las diferencias entre C++, Go y Java **no** son significativas entre sí (p > 0.05), pero los tres son significativamente más rápidos que Python (p < 0.001).
+
+**Comparaciones por tamaño** (detalle clave, dado que hay interacción):
+
+| N | Comparación | ¿Diferencia significativa? |
+|---|-------------|---------------------------|
+| 500 | Go vs Java | No (p = 1.0) |
+| 1000 | Go vs Java | No (p = 0.996) |
+| 1500 | Go vs Java | **Sí** (p < 0.001) |
+
+Ejemplo: Go y Java no difieren significativamente para N=500 ni N=1000, pero sí para N=1500. Esto muestra por qué importa estudiar la interacción y no quedarse solo con la conclusión global.
+
+> **Nota**: Java tuvo la menor media para N=500 y N=1000; Go la tuvo para N=1500. El orden relativo cambia con el tamaño, lo cual confirma la interacción. Estos resultados corresponden al hardware y opciones de compilación utilizadas.
+
+### Guía de visualizaciones
+
+Cada gráfico responde una pregunta distinta sobre rendimiento o variabilidad:
+
+| Gráfico | Pregunta que responde |
+|---------|----------------------|
+| **Boxplot por lenguaje** | ¿Cuál es la dispersión, mediana y valores atípicos de cada grupo? |
+| **Interacción (líneas)** | ¿Cómo cambia el tiempo medio con N en cada lenguaje? Si las líneas no son paralelas, hay interacción. |
+| **Barras comparativas** | ¿Qué lenguaje logra menor media para cada tamaño? |
+| **Boxplot por tamaño** | ¿Cómo se comparan las distribuciones dentro de un mismo N? |
+| **Heatmap** | Resumen visual de las 12 medias con intensidad de color (tonos intensos = mayor tiempo). |
+| **Speedup** | ¿Cuántas veces supera cada lenguaje a Python? El speedup aumenta en tamaños grandes. |
+| **Interacción ± DE** | Tendencia media y variación (desviación estándar) entre las 10 repeticiones. |
+
+> Los gráficos describen tendencias; no reemplazan el contraste estadístico.
 
 ### Archivos generados
 
@@ -383,11 +457,36 @@ El script `analysis/analyze.py` genera:
 
 ## Criterios ACM Artifact Review & Badging
 
-Este artifact está diseñado para cumplir con:
+Este artifact está diseñado para avanzar hacia los criterios ACM:
 
-- **Functional**: El código se ejecuta correctamente y produce los resultados documentados.
-- **Reusable**: Pipeline automatizado (Snakemake), entornos reproducibles (Docker), semilla fija, documentación completa.
-- **Available**: Publicado en Zenodo con DOI y licencia abierta (MIT).
+### Artifact Functional
+
+Se puede obtener, ejecutar y genera resultados verificables:
+
+- Cuatro implementaciones ejecutables con Dockerfiles propios.
+- Imágenes Docker construidas desde el código fuente local.
+- 120 mediciones integradas en `benchmark.csv`.
+- ANOVA, Tukey HSD y 7 gráficos generados automáticamente.
+- Script de verificación (`verify_week4.ps1`) que comprueba artefactos generados.
+
+### Artifact Reusable
+
+Además de funcionar, está documentado, organizado y es modificable:
+
+- README paso a paso con requisitos y versiones declaradas.
+- Parámetros configurables (tamaños N, repeticiones, semilla) en el Snakefile.
+- Código y carpetas organizados por responsabilidad.
+- Validación numérica cruzada entre lenguajes (checksum).
+- Rutas portables (Linux/macOS y Windows).
+
+### Revisiones pendientes para consolidar Reusable
+
+- Probar instalación desde un entorno limpio (otro equipo).
+- Confirmar portabilidad Docker entre sistemas operativos.
+- Probar cambios de N y repeticiones sin modificar código.
+- Registrar limitaciones conocidas del diseño experimental.
+
+> **Nota**: Los distintivos ACM no se asignan automáticamente por usar Docker o Snakemake. La condición Reusable requiere evaluación independiente.
 
 ---
 
