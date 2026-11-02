@@ -47,7 +47,11 @@ matrix-benchmark/
 ├── README.md                          # Este archivo
 ├── LICENSE                            # Licencia MIT
 ├── FAIR_datasheet.md                  # Mini datasheet FAIR
-├── Snakefile                          # Pipeline de automatización
+├── Snakefile                          # Pipeline de automatizacion
+├── run_experiment.sh                  # Script de ejecucion completa (Linux/macOS)
+├── run_experiment.ps1                 # Script de ejecucion completa (Windows)
+├── run_native.sh                      # Ejecucion nativa sin Docker (Linux/macOS)
+├── verify_week4.ps1                   # Verificacion de requisitos Semana 4 (Windows)
 ├── implementations/
 │   ├── cpp/
 │   │   ├── matrix_mult.cpp            # Implementación C++
@@ -79,7 +83,8 @@ matrix-benchmark/
     ├── boxplot_comparison.png
     ├── heatmap_times.png
     ├── speedup_chart.png
-    └── interaction_chart.png
+    ├── interaction_chart.png
+    └── Semana5_Artifact_Evaluacion.pptx
 ```
 
 ---
@@ -123,15 +128,24 @@ El archivo consolidado [`benchmark.csv`](results/benchmark.csv) integra las 120 
 |--------|---------|-----------|
 | **Semana 2** | [`Semana2_Benchmark_Matrices.pptx`](results/Semana2_Benchmark_Matrices.pptx) | Implementación, decisiones de diseño, entorno y primeros resultados |
 | **Semana 3** | [`Semana3_Benchmark.pptx`](results/Semana3_Benchmark.pptx) | Resultados de benchmark Semana 3 |
+| **Semana 5** | [`Semana5_Artifact_Evaluacion.pptx`](results/Semana5_Artifact_Evaluacion.pptx) | Evaluacion del artifact: badges ACM, graficos y publicacion |
 
 ---
 
 ## Requisitos previos
 
-- [Docker](https://docs.docker.com/get-docker/) ≥ 24.0
-- [Snakemake](https://snakemake.readthedocs.io/) ≥ 8.0
-- Python ≥ 3.10
-- Dependencias de análisis: `pip install -r analysis/requirements.txt`
+### Opcion A: Ejecucion con Docker (Linux/macOS)
+
+- [Docker](https://docs.docker.com/get-docker/) >= 24.0
+- [Snakemake](https://snakemake.readthedocs.io/) >= 8.0
+- Python >= 3.10
+- Dependencias de analisis: `pip install -r analysis/requirements.txt`
+
+### Opcion B: Ejecucion nativa (Windows/Linux/macOS)
+
+- g++ (C++17), Go >= 1.22, JDK >= 21, Python >= 3.10
+- [Snakemake](https://snakemake.readthedocs.io/) >= 8.0 (opcional, para pipeline automatizado)
+- Dependencias de analisis: `pip install -r analysis/requirements.txt`
 
 ---
 
@@ -188,7 +202,21 @@ Este script compila, ejecuta los 4 benchmarks, integra los CSVs y corre el anál
 
 > **Nota**: La ejecución completa (especialmente Python N=1500) puede tomar más de 1 hora.
 
-### Ejecución paso a paso (alternativa)
+### Ejecucion en Windows (PowerShell)
+
+Para ejecutar el experimento completo en Windows de forma nativa:
+
+```powershell
+# Ejecutar el experimento completo (compilacion, benchmarks, analisis)
+.\run_experiment.ps1
+
+# Verificar que se cumplen los requisitos de Semana 4
+.\verify_week4.ps1
+```
+
+El script `run_experiment.ps1` compila cada lenguaje, ejecuta los benchmarks para todos los tamanos y repeticiones, consolida los CSVs y genera el analisis estadistico.
+
+### Ejecucion paso a paso (alternativa)
 
 Si se prefiere ejecutar cada etapa por separado:
 
@@ -208,36 +236,39 @@ Características del hardware y software donde se ejecutó el experimento:
 
 ### Hardware y sistema operativo
 
+Los resultados actuales fueron obtenidos en ejecucion nativa (sin Docker) en el siguiente entorno:
+
 | Componente | Valor |
 |------------|-------|
-| **Procesador** | Intel(R) Core(TM) i7-1255U @ 2.60GHz |
+| **Procesador** | Intel(R) Core(TM) i7-1255U @ 2.60GHz (12th Gen, 10 cores) |
 | **Memoria RAM** | 16 GB DDR4 |
-| **Sistema operativo** | Ubuntu 22.04.4 LTS |
+| **Sistema operativo** | Windows 11 |
 | **Arquitectura** | x86_64 |
 | **Equipo** | Notebook |
-| **Docker** | 29.8.2 |
 
-### Lenguajes, compiladores y máquinas virtuales
+### Lenguajes, compiladores y versiones
 
-Cada lenguaje se ejecuta en su propia imagen Docker oficial, garantizando aislamiento y reproducibilidad:
+Los resultados fueron generados en ejecucion nativa con los siguientes compiladores/interpretes:
 
-| Lenguaje | Imagen Docker | Compilador / Runtime | Flags |
-|----------|--------------|---------------------|-------|
-| **C++** | `gcc:13` | GCC 13.x | `-O0 -std=c++17` (sin optimización) |
-| **Go** | `golang:1.22` | Go 1.22.x | `go build` (configuración por defecto) |
-| **Java** | `eclipse-temurin:21` | OpenJDK 21 (HotSpot JVM) | `javac` + `java` |
-| **Python** | `python:3.12-slim` | CPython 3.12 | Interpretado, sin extensiones C |
+| Lenguaje | Compilador / Runtime | Version | Flags |
+|----------|---------------------|---------|-------|
+| **C++** | MinGW GCC | g++ (MinGW-W64) | `-O0 -std=c++17` (sin optimizacion) |
+| **Go** | Go | 1.22+ | `go build` (configuracion por defecto) |
+| **Java** | OpenJDK (HotSpot JVM) | 21+ | `javac` + `java` |
+| **Python** | CPython | 3.12 | Interpretado, sin extensiones C |
 
-> **Nota**: C++ se compila con `-O0` para deshabilitar las optimizaciones del compilador y comparar el rendimiento del algoritmo puro, no la capacidad de optimización de cada toolchain.
+> **Nota**: C++ se compila con `-O0` para deshabilitar las optimizaciones del compilador y comparar el rendimiento del algoritmo puro, no la capacidad de optimizacion de cada toolchain.
 
-Para obtener esta información automáticamente:
+### Entorno Docker (alternativa)
 
-```bash
-echo "CPU: $(lscpu | grep 'Model name' | sed 's/.*: *//')"
-echo "RAM: $(free -h | awk '/Mem:/{print $2}')"
-echo "OS: $(uname -srm)"
-echo "Docker: $(docker --version)"
-```
+El experimento tambien puede reproducirse con Docker, donde cada lenguaje se ejecuta en su propia imagen oficial:
+
+| Lenguaje | Imagen Docker | Compilador / Runtime |
+|----------|--------------|---------------------|
+| **C++** | `gcc:13` | GCC 13.x |
+| **Go** | `golang:1.22` | Go 1.22.x |
+| **Java** | `eclipse-temurin:21` | OpenJDK 21 |
+| **Python** | `python:3.12-slim` | CPython 3.12 |
 
 ---
 
@@ -256,9 +287,18 @@ Cada archivo CSV sigue la estructura:
 
 ## Análisis estadístico
 
-### Comparación de tiempos promedio
+### Tiempos promedio de ejecucion (segundos)
 
-![Tiempo promedio de ejecución por lenguaje y tamaño de matriz](results/bar_chart_comparison.png)
+| Lenguaje | N=500 | N=1000 | N=1500 |
+|----------|-------|--------|--------|
+| **C++** | 0.505 | 7.894 | 34.856 |
+| **Go** | 0.129 | 1.948 | 9.657 |
+| **Java** | 0.082 | 1.349 | 15.479 |
+| **Python** | 7.715 | 63.322 | 233.613 |
+
+### Comparacion de tiempos promedio
+
+![Tiempo promedio de ejecucion por lenguaje y tamano de matriz](results/bar_chart_comparison.png)
 
 ### Distribución de tiempos (Boxplot)
 
@@ -282,9 +322,9 @@ Todos los factores y su interacción son estadísticamente significativos (p < 0
 
 | Factor | F | p-valor | Significancia |
 |--------|---|---------|---------------|
-| Lenguaje | 62,317.49 | 1.09 × 10⁻¹⁷⁴ | *** |
-| Tamaño (N) | 68,794.05 | 2.01 × 10⁻¹⁶⁸ | *** |
-| Lenguaje × Tamaño | 25,489.80 | 1.03 × 10⁻¹⁶⁷ | *** |
+| Lenguaje | 40,162.62 | 2.16 × 10⁻¹⁶⁴ | *** |
+| Tamaño (N) | 33,751.04 | 9.64 × 10⁻¹⁵² | *** |
+| Lenguaje × Tamaño | 17,587.96 | 5.08 × 10⁻¹⁵⁹ | *** |
 
 ### Comparaciones post-hoc (Tukey HSD)
 

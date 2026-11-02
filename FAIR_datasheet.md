@@ -17,10 +17,10 @@ Este dataset contiene mediciones de tiempo de ejecución del algoritmo naive de 
 
 ## 3. Procedencia (Provenance)
 
-- **Método de generación**: Ejecución automatizada mediante pipeline Snakemake con contenedores Docker.
+- **Metodo de generacion**: Ejecucion automatizada mediante pipeline Snakemake (con Docker o nativo).
 - **Matrices de entrada**: Generadas con un generador lineal congruencial (LCG) con semilla fija (seed=42 para matriz A, seed=43 para matriz B).
-- **Entorno**: Contenedores Docker aislados por lenguaje, ejecutados secuencialmente.
-- **Medición**: Solo se mide el tiempo de la operación de multiplicación; la generación de matrices se excluye.
+- **Entorno de los resultados actuales**: Ejecucion nativa en Windows 11, Intel i7-1255U, 16 GB RAM. Tambien reproducible con contenedores Docker aislados por lenguaje.
+- **Medicion**: Solo se mide el tiempo de la operacion de multiplicacion; la generacion de matrices se excluye.
 
 ## 4. Estructura de los datos
 
