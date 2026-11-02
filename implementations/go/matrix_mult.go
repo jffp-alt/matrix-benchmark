@@ -74,4 +74,14 @@ func main() {
 		fmt.Fprintf(f, "go,%d,%d,%.6f\n", *n, r, elapsed)
 		fmt.Fprintf(os.Stderr, "go,N=%d,rep=%d,time=%.6fs\n", *n, r, elapsed)
 	}
+
+	// Calcular checksum de la matriz resultado para validacion cruzada entre lenguajes
+	C := multiply(A, B, *n)
+	checksum := 0.0
+	for i := 0; i < *n; i++ {
+		for j := 0; j < *n; j++ {
+			checksum += C[i][j]
+		}
+	}
+	fmt.Fprintf(os.Stderr, "CHECKSUM:N=%d,sum=%.6f\n", *n, checksum)
 }

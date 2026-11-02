@@ -53,6 +53,8 @@ matrix-benchmark/
 ├── run_experiment.sh                  # Ejecucion del pipeline completo (Linux/macOS)
 ├── run_experiment.ps1                 # Ejecucion del pipeline completo (Windows)
 ├── run_native.sh                      # Ejecucion nativa sin Docker (Linux/macOS)
+├── validate_checksum.sh               # Validacion numerica cruzada entre lenguajes (Linux/macOS)
+├── validate_checksum.ps1              # Validacion numerica cruzada entre lenguajes (Windows)
 ├── verify_week4.ps1                   # Verificacion de requisitos Semana 4 (Windows)
 ├── implementations/
 │   ├── cpp/
@@ -230,6 +232,21 @@ powershell -ExecutionPolicy Bypass -File verify_week4.ps1
 ```
 
 El script `run_experiment.ps1` verifica que las imagenes Docker existan, limpia resultados previos, ejecuta el pipeline Snakemake con `--forceall` y verifica los artefactos generados.
+
+### Validacion numerica cruzada (opcional)
+
+Para verificar que los 4 lenguajes producen matrices resultado identicas (misma entrada, mismo LCG, mismo checksum):
+
+```bash
+# Linux/macOS
+chmod +x validate_checksum.sh
+./validate_checksum.sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File validate_checksum.ps1
+```
+
+Este script ejecuta cada contenedor con N=10 y compara la suma total de la matriz resultado. Si los 4 checksums coinciden, se confirma que las diferencias de tiempo son genuinas y no causadas por datos distintos.
 
 ### Ejecucion paso a paso (alternativa)
 

@@ -61,6 +61,12 @@ def main():
             f.write(f"python,{args.n},{r},{elapsed:.6f}\n")
             print(f"python,N={args.n},rep={r},time={elapsed:.6f}s", file=__import__('sys').stderr)
 
+    # Calcular checksum de la matriz resultado para validacion cruzada entre lenguajes
+    import sys
+    C_check = multiply(A, B, args.n)
+    checksum = sum(C_check[i][j] for i in range(args.n) for j in range(args.n))
+    print(f"CHECKSUM:N={args.n},sum={checksum:.6f}", file=sys.stderr)
+
 
 if __name__ == "__main__":
     main()

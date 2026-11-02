@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <iomanip>
 
 using namespace std;
 
@@ -70,5 +71,14 @@ int main(int argc, char *argv[]) {
     }
 
     out.close();
+
+    // Calcular checksum de la matriz resultado para validacion cruzada entre lenguajes
+    auto C_check = multiply(A, B, N);
+    double checksum = 0.0;
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            checksum += C_check[i][j];
+    cerr << "CHECKSUM:N=" << N << ",sum=" << fixed << checksum << endl;
+
     return 0;
 }

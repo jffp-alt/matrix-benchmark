@@ -64,5 +64,13 @@ public class MatrixMult {
         }
 
         fw.close();
+
+        // Calcular checksum de la matriz resultado para validacion cruzada entre lenguajes
+        double[][] C_check = multiply(A, B, N);
+        double checksum = 0.0;
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                checksum += C_check[i][j];
+        System.err.printf("CHECKSUM:N=%d,sum=%.6f%n", N, checksum);
     }
 }
