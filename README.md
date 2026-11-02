@@ -154,7 +154,7 @@ El archivo consolidado [`benchmark.csv`](results/benchmark.csv) integra las 120 
 ### Paso 1: Clonar el repositorio
 
 ```bash
-git clone https://github.com/<usuario>/matrix-benchmark.git
+git clone https://github.com/jffp-alt/matrix-benchmark.git
 cd matrix-benchmark
 ```
 
