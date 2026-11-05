@@ -1,0 +1,37 @@
+﻿# Configuracion del experimento - Benchmark Multiplicacion de Matrices NxN
+experimento:
+  nombre: "Benchmark reproducible de multiplicacion de matrices NxN"
+  autor: "Jorge Fornes Pavez"
+  institucion: "Universidad de Santiago de Chile - DIINF"
+  doi: "https://doi.org/10.5281/zenodo.23987654"
+
+parametros:
+  tamanos_matriz: [500, 1000, 1500]
+  repeticiones: 10
+  semilla_a: 42
+  semilla_b: 43
+
+lenguajes:
+  - nombre: cpp
+    imagen_docker: matrix-cpp
+    archivo_resultado: results/cpp.csv
+  - nombre: go
+    imagen_docker: matrix-go
+    archivo_resultado: results/go.csv
+  - nombre: java
+    imagen_docker: matrix-java
+    archivo_resultado: results/java.csv
+  - nombre: python
+    imagen_docker: matrix-python
+    archivo_resultado: results/python.csv
+
+resultados:
+  directorio: results/
+  consolidado: results/benchmark.csv
+  anova: results/anova_results.txt
+  tukey: results/tukey_results.txt
+
+analisis:
+  nivel_significancia: 0.05
+  prueba_principal: "ANOVA dos factores con interaccion"
+  prueba_posthoc: "Tukey HSD"
